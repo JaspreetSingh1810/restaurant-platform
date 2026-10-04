@@ -234,7 +234,7 @@
         const itemList = cart.map(i => `${i.name} x${i.qty} - ₹${i.price * i.qty}`).join('\n');
         
         // Option 1: UPI Payment Link
-        const upiUrl = `upi://pay?pa=yourname@upi&pn=WaffleStreet&am=${total}&cu=INR&tn=WaffleStreet%20Order`;
+        const upiUrl = `upi://pay?pa=9599507322@ptaxis&pn=WaffleStreet&am=${total}&cu=INR&tn=WaffleStreet%20Order`;
         
         // Option 2: WhatsApp Message
         const message = `🍔 *New Order - WaffleStreet*%0A%0A📋 *Items:*%0A${encodeURIComponent(itemList)}%0A%0A💰 *Total:* ₹${total}%0A%0APlease confirm payment via UPI:`;
