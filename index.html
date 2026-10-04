@@ -8,42 +8,51 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Poppins', sans-serif; }
+        :root {
+            --primary-color: #D4AF37; /* Gold Theme */
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        
+        /* Premium Card Styles */
+        .premium-card { 
+            transition: all 0.3s ease; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 1rem; 
+        }
+        .premium-card:hover { 
+            border-color: var(--primary-color); 
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.15);
+            transform: translateY(-2px);
+        }
+
         /* Animations */
         .fade-in { animation: fadeIn 0.6s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Hover Zoom Effect */
-        .zoom-card { transition: all 0.3s ease; }
-        .zoom-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .zoom-img { transition: transform 0.4s ease; }
-        .zoom-card:hover .zoom-img { transform: scale(1.1); }
 
         #coverHero { height: 280px; background-size: cover; background-position: center; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body>
 
 <div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl pb-24 overflow-hidden">
     <!-- Hero -->
     <div id="coverHero" class="relative bg-slate-200">
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
     </div>
-
+    
     <!-- Header -->
     <header class="text-center px-6 relative -mt-16 z-10">
         <div class="inline-block p-1 bg-white rounded-full shadow-lg">
             <img id="bizLogo" class="w-24 h-24 rounded-full object-cover hidden">
         </div>
-        <h1 id="bizName" class="text-2xl font-extrabold uppercase mt-2 text-white md:text-slate-800 transition-colors">Loading...</h1>
+        <h1 id="bizName" class="text-2xl font-extrabold uppercase mt-2 text-white md:text-slate-800">Loading...</h1>
     </header>
 
-    <!-- Menu -->
+    <!-- Menu Container -->
     <div id="menuContainer" class="p-6 space-y-8 fade-in"></div>
 
     <!-- Cart Button -->
-    <button onclick="toggleCart()" class="fixed bottom-6 left-6 right-6 bg-black text-[#D4AF37] py-4 rounded-2xl shadow-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-900 transition z-50">
+    <button onclick="toggleCart()" class="fixed bottom-6 left-6 right-6 bg-slate-900 text-[#D4AF37] py-4 rounded-2xl shadow-2xl flex items-center justify-center gap-3 font-bold hover:bg-black transition z-50">
         <i class="fas fa-shopping-basket"></i>
         VIEW CART (<span id="cartCount">0</span>)
     </button>
@@ -54,6 +63,7 @@
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('biz') || 'thewafflestreet-amritsar';
 
+    // Fetching the JSON data
     fetch(`./businesses/${slug}.json`)
         .then(res => res.json())
         .then(data => { bizData = data; applyData(); });
@@ -71,22 +81,42 @@
 
     function renderMenu() {
         const container = document.getElementById('menuContainer');
-        container.innerHTML = bizData.menu.map(cat => `
+        
+        // 1. Render Featured Dish Section
+        let featuredHTML = '';
+        if (bizData.featuredDish) {
+            featuredHTML = `
+                <div class="bg-amber-50 p-5 rounded-3xl border-2 border-[#D4AF37] mb-8">
+                    <h3 class="text-xs font-bold text-[#D4AF37] uppercase tracking-widest mb-3">⭐ Chef's Special</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-inner">
+                            <img src="${bizData.featuredDish.image}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-slate-800">${bizData.featuredDish.name}</h4>
+                            <p class="text-xl font-black text-[#D4AF37]">₹${bizData.featuredDish.price}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. Render Main Menu
+        const menuHTML = bizData.menu.map(cat => `
             <div>
-                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-[#D4AF37] pl-3">${cat.category}</h3>
+                <h3 class="text-lg font-extrabold mb-4 text-slate-800 border-l-4 border-[#D4AF37] pl-3">${cat.category}</h3>
                 <div class="space-y-4">
                     ${cat.items.map(item => `
-                        <div class="zoom-card flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="premium-card flex items-center gap-4 bg-white p-3">
                             <div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
-                                <img src="${item.image || 'https://placehold.co/200x200?text=Food'}" 
-                                     class="zoom-img w-full h-full object-cover">
+                                <img src="${item.image || 'https://placehold.co/200x200?text=Food'}" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1">
                                 <h4 class="font-bold text-slate-800">${item.name}</h4>
                                 <p class="text-[11px] text-slate-400 line-clamp-1">${item.desc || ''}</p>
-                                <p class="font-black text-[#D4AF37] mt-1">₹${item.price}</p>
+                                <p class="font-bold text-[#D4AF37] mt-1">₹${item.price}</p>
                             </div>
-                            <button class="bg-slate-100 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
+                            <button class="bg-slate-50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
                                 <i class="fas fa-plus text-xs"></i>
                             </button>
                         </div>
@@ -94,8 +124,10 @@
                 </div>
             </div>
         `).join('');
+
+        container.innerHTML = featuredHTML + menuHTML;
     }
-    
+
     function toggleCart() { alert("Cart coming soon!"); }
 </script>
 </body>
