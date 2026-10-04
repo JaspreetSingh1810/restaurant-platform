@@ -3,183 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Online | The Locals Platform</title>
+    <title>WaffleStreet | Order Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --gold: #D4AF37; --dark: #1a1a1a; }
-        .bg-gold { background-color: var(--gold); }
-        .text-gold { color: var(--gold); }
-        .border-gold { border-color: var(--gold); }
-        .cart-drawer { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
-        .cart-drawer.open { transform: translateX(0); }
-        [v-cloak] { display: none; }
+        .gold-theme { --primary: #D4AF37; --bg: #1a1a1a; }
+        /* Hero Cover logic */
+        #coverHero { height: 250px; background-size: cover; background-position: center; transition: all 0.5s ease; }
+        .logo-circle { width: 80px; height: 80px; margin-top: -40px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="bg-stone-50 font-sans">
+<body class="bg-slate-50 font-sans">
 
-<div id="app" class="max-w-md mx-auto min-h-screen shadow-xl bg-white pb-24 relative">
-    <!-- Header -->
-    <header class="bg-dark p-6 text-center border-b-4 border-gold">
-        <h1 class="text-gold text-2xl font-bold tracking-widest uppercase" id="bizName">Loading...</h1>
-        <div id="loyaltyBadge" class="mt-2 inline-block bg-gold text-black px-3 py-1 rounded-full text-xs font-bold">⭐ TWS GOLD MEMBER</div>
+<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl pb-24">
+    <!-- Cover Image Hero -->
+    <div id="coverHero" class="bg-slate-200 relative">
+        <div class="absolute inset-0 bg-black/30"></div>
+    </div>
+
+    <!-- Header & Logo -->
+    <header class="text-center px-4 pb-4">
+        <div class="flex justify-center">
+            <img id="bizLogo" class="logo-circle rounded-full bg-white object-contain hidden">
+        </div>
+        <h1 id="bizName" class="text-2xl font-black uppercase mt-2 tracking-widest text-slate-800">Loading...</h1>
+        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Amritsar's Favorite Waffles</p>
     </header>
 
-    <!-- Featured Dish -->
-    <section id="featured" class="p-4">
-        <div class="relative rounded-2xl overflow-hidden h-48 shadow-lg border-2 border-gold/20">
-            <img id="featuredImg" src="" class="w-full h-full object-cover">
-            <div class="absolute bottom-0 left-0 right-0 bg-black/60 p-3 text-white">
-                <p class="text-xs uppercase tracking-tighter text-gold font-bold">Chef's Special</p>
-                <h2 id="featuredTitle" class="font-bold">...</h2>
-            </div>
-        </div>
-    </section>
-
-    <!-- Categories Tab -->
-    <div class="sticky top-0 bg-white z-40 flex overflow-x-auto p-3 gap-2 border-b no-scrollbar" id="categoryNav"></div>
-
-    <!-- Menu Items -->
+    <!-- Menu Categories -->
     <div id="menuContainer" class="p-4 space-y-8"></div>
 
-    <!-- Order Button -->
-    <button onclick="toggleCart()" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-dark text-gold px-8 py-4 rounded-full shadow-2xl flex items-center gap-4 z-50 border-2 border-gold font-bold">
-        <i class="fas fa-shopping-basket"></i>
+    <!-- View Cart Button -->
+    <button onclick="toggleCart()" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-4 z-50 border-2 border-[#D4AF37] font-bold">
+        <i class="fas fa-shopping-basket text-[#D4AF37]"></i>
         VIEW CART (<span id="cartCount">0</span>)
     </button>
-
-    <!-- Cart Drawer -->
-    <div id="cartDrawer" class="cart-drawer fixed inset-y-0 right-0 w-full max-w-md bg-white z-[60] shadow-2xl flex flex-col p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold italic">Your Order</h2>
-            <button onclick="toggleCart()" class="text-2xl">&times;</button>
-        </div>
-
-        <div id="cartItems" class="flex-1 overflow-y-auto space-y-4"></div>
-
-        <div class="mt-auto border-t-2 border-dashed pt-4 space-y-4">
-            <!-- Service Selection -->
-            <div class="grid grid-cols-3 gap-2">
-                <button onclick="setService('delivery')" class="service-btn border p-2 rounded text-xs border-gold">Delivery</button>
-                <button onclick="setService('pickup')" class="service-btn border p-2 rounded text-xs">Pickup</button>
-                <button onclick="setService('dinein')" class="service-btn border p-2 rounded text-xs">Dine-In</button>
-            </div>
-            
-            <div id="addressSection" class="space-y-2">
-                <input id="userName" type="text" placeholder="Your Name" class="w-full p-2 border rounded">
-                <input id="userAddress" type="text" placeholder="Address / Table Number" class="w-full p-2 border rounded">
-            </div>
-
-            <div class="flex justify-between text-xl font-bold text-dark">
-                <span>Total:</span>
-                <span id="cartTotal">₹0</span>
-            </div>
-
-            <button onclick="processPayment()" class="w-full bg-gold text-black py-4 rounded-xl font-black text-lg hover:bg-yellow-500">PAY & ORDER VIA WHATSAPP</button>
-        </div>
-    </div>
 </div>
 
 <script>
     let bizData = {};
-    let cart = [];
-    let selectedService = 'delivery';
 
-    // 1. Fetch Business Data based on URL ?biz=
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('biz') || 'thewafflestreet-amritsar';
 
+    // Fetch the JSON
     fetch(`./businesses/${slug}.json`)
         .then(res => res.json())
         .then(data => {
             bizData = data;
-            renderMenu();
+            applyData();
         });
+
+    function applyData() {
+        document.getElementById('bizName').innerText = bizData.bizName;
+
+        // 1. Apply Logo
+        if(bizData.images && bizData.images.logo) {
+            const logoImg = document.getElementById('bizLogo');
+            logoImg.src = bizData.images.logo;
+            logoImg.classList.remove('hidden');
+        }
+
+        // 2. Apply Cover Image
+        if(bizData.images && bizData.images.cover) {
+            document.getElementById('coverHero').style.backgroundImage = `url('${bizData.images.cover}')`;
+        } else {
+            // Fallback image if none uploaded
+            document.getElementById('coverHero').style.backgroundImage = `url('https://images.unsplash.com/photo-1573335553610-a871dfd95bf5?auto=format&fit=crop&w=800&q=80')`;
+        }
+
+        renderMenu();
+    }
 
     function renderMenu() {
-        document.getElementById('bizName').innerText = bizData.bizName;
-        document.getElementById('featuredImg').src = bizData.featuredDish.image;
-        document.getElementById('featuredTitle').innerText = bizData.featuredDish.name;
-
-        const nav = document.getElementById('categoryNav');
         const container = document.getElementById('menuContainer');
-        
-        bizData.menu.forEach(cat => {
-            nav.innerHTML += `<button onclick="scrollToCat('${cat.category}')" class="whitespace-nowrap px-4 py-2 bg-stone-100 rounded-full text-sm font-bold border-2 border-transparent hover:border-gold">${cat.category}</button>`;
-            
-            let itemsHtml = cat.items.map(item => `
-                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-stone-100 shadow-sm">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-stone-800">${item.name}</h4>
-                        <p class="text-xs text-stone-400 leading-tight">${item.desc}</p>
-                        <p class="font-bold text-gold mt-1">₹${item.price}</p>
-                    </div>
-                    <button onclick="addToCart('${item.id}', '${item.name}', ${item.price})" class="bg-stone-900 text-gold w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg border border-gold hover:scale-110 transition">+</button>
-                </div>
-            `).join('');
-
-            container.innerHTML += `<div id="${cat.category}"><h3 class="text-lg font-black text-dark mb-4 border-l-4 border-gold pl-3">${cat.category}</h3>${itemsHtml}</div>`;
-        });
-    }
-
-    function addToCart(id, name, price) {
-        cart.push({ id, name, price });
-        updateCart();
-    }
-
-    function updateCart() {
-        document.getElementById('cartCount').innerText = cart.length;
-        const itemsDiv = document.getElementById('cartItems');
-        itemsDiv.innerHTML = cart.map((item, idx) => `
-            <div class="flex justify-between text-sm">
-                <span>${item.name}</span>
-                <div class="flex gap-4">
-                    <b>₹${item.price}</b>
-                    <button onclick="cart.splice(${idx}, 1); updateCart()" class="text-red-500">🗑️</button>
+        container.innerHTML = bizData.menu.map(cat => `
+            <div>
+                <h3 class="text-lg font-black border-l-4 border-[#D4AF37] pl-3 mb-4">${cat.category}</h3>
+                <div class="space-y-3">
+                    ${cat.items.map(item => `
+                        <div class="flex gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                            ${item.image ? `<img src="${item.image}" class="w-20 h-20 rounded-lg object-cover">` : ''}
+                            <div class="flex-1">
+                                <h4 class="font-bold text-sm text-slate-800">${item.name}</h4>
+                                <p class="text-[10px] text-slate-400 line-clamp-2">${item.desc}</p>
+                                <p class="font-black text-[#D4AF37] mt-1">₹${item.price}</p>
+                            </div>
+                            <button class="bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center self-center">+</button>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         `).join('');
-
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
-        document.getElementById('cartTotal').innerText = `₹${total}`;
-    }
-
-    function toggleCart() {
-        document.getElementById('cartDrawer').classList.toggle('open');
-    }
-
-    function setService(s) {
-        selectedService = s;
-        document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('border-gold'));
-        event.target.classList.add('border-gold');
-        document.getElementById('userAddress').placeholder = (s === 'dinein') ? "Table Number" : "Full Address";
-    }
-
-    function processPayment() {
-        const name = document.getElementById('userName').value;
-        const address = document.getElementById('userAddress').value;
-        if(!name || !address) return alert("Please enter details!");
-
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
-        const upiUrl = `upi://pay?pa=${bizData.upiId}&pn=${bizData.bizName}&am=${total}&cu=INR`;
-        
-        // Open UPI app
-        window.location.href = upiUrl;
-
-        // Prepare WhatsApp message
-        setTimeout(() => {
-            let orderText = `*NEW ORDER FROM WEBSITE*%0A--------------------------%0A*Name:* ${name}%0A*Type:* ${selectedService.toUpperCase()}%0A*Address:* ${address}%0A--------------------------%0A`;
-            cart.forEach(i => orderText += `• ${i.name} - ₹${i.price}%0A`);
-            orderText += `--------------------------%0A*TOTAL: ₹${total}*%0A--------------------------%0A_Status: Paid via UPI_`;
-            
-            const waUrl = `https://wa.me/${bizData.phone}?text=${orderText}`;
-            window.open(waUrl, '_blank');
-        }, 3000);
-    }
-
-    function scrollToCat(id) {
-        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
     }
 </script>
 </body>
