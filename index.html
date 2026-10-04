@@ -3,62 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WaffleStreet | Order Online</title>
+    <title>WaffleStreet | Dark Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary-color: #D4AF37; }
-        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
-        .premium-card { transition: all 0.3s ease; border: 1px solid #e2e8f0; border-radius: 1rem; }
-        .premium-card:hover { border-color: var(--primary-color); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.15); transform: translateY(-2px); }
-        .fade-in { animation: fadeIn 0.6s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        #coverHero { height: 280px; background-size: cover; background-position: center; }
-        /* Cart Drawer */
-        .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #f1f5f9; }
+        .premium-card { transition: all 0.3s ease; border: 1px solid #334155; border-radius: 1rem; background-color: #1e293b; }
+        .premium-card:hover { border-color: var(--primary-color); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.1); }
+        #coverHero { height: 280px; background-size: cover; background-position: center; background-image: url('https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80'); }
+        .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .cart-overlay.active { opacity: 1; pointer-events: all; }
-        .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-w-md; h-full: 100%; background: white; z-index: 50; transition: right 0.3s ease; overflow-y: auto; }
+        .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px; height: 100%; background: #0f172a; z-index: 50; transition: right 0.3s ease; overflow-y: auto; border-left: 1px solid #334155; }
         .cart-drawer.active { right: 0; }
     </style>
 </head>
 <body>
-<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl pb-24 overflow-hidden">
-    <!-- Hero -->
-    <div id="coverHero" class="relative bg-slate-200">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div id="app" class="max-w-md mx-auto min-h-screen bg-slate-900 shadow-2xl pb-24 overflow-hidden">
+    <div id="coverHero" class="relative">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
     </div>
 
-    <!-- Header -->
     <header class="text-center px-6 relative -mt-16 z-10">
-        <div class="inline-block p-1 bg-white rounded-full shadow-lg">
+        <div class="inline-block p-1 bg-slate-800 rounded-full shadow-lg">
             <img id="bizLogo" class="w-24 h-24 rounded-full object-cover hidden">
         </div>
-        <h1 id="bizName" class="text-2xl font-extrabold uppercase mt-2 text-white md:text-slate-800">Loading...</h1>
+        <h1 id="bizName" class="text-2xl font-extrabold uppercase mt-2 text-white">Loading...</h1>
     </header>
     
-    <!-- Menu Container -->
-    <div id="menuContainer" class="p-6 space-y-8 fade-in"></div>
+    <div id="menuContainer" class="p-6 space-y-8"></div>
     
-    <!-- Cart Button -->
-    <button onclick="toggleCart()" class="fixed bottom-6 left-6 right-6 bg-slate-900 text-[#D4AF37] py-4 rounded-2xl shadow-2xl flex items-center justify-center gap-3 font-bold hover:bg-black transition z-50">
+    <button onclick="toggleCart()" class="fixed bottom-6 left-6 right-6 bg-[#D4AF37] text-slate-900 py-4 rounded-2xl shadow-2xl flex items-center justify-center gap-3 font-bold hover:bg-amber-500 transition z-40">
         <i class="fas fa-shopping-basket"></i>
         VIEW CART (<span id="cartCount">0</span>)
     </button>
 </div>
 
-<!-- Cart Drawer -->
 <div id="cartOverlay" class="cart-overlay" onclick="toggleCart()"></div>
-<div id="cartDrawer" class="cart-drawer p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold">Your Cart</h2>
-        <button onclick="toggleCart()" class="text-slate-500 hover:text-black"><i class="fas fa-times text-xl"></i></button>
-    </div>
-    <div id="cartItems" class="space-y-4 mb-6"></div>
-    <div id="cartSummary" class="border-t pt-4"></div>
-    <button onclick="checkout()" class="w-full bg-[#D4AF37] text-white py-4 rounded-xl font-bold hover:bg-amber-600 transition">
-        PROCEED TO PAY
-    </button>
+<div id="cartDrawer" class="cart-drawer p-6 text-slate-100">
+    <!-- Content managed by JS -->
 </div>
 
 <script>
@@ -67,11 +51,9 @@
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('biz') || 'thewafflestreet-amritsar';
     
-    // Fetch JSON data - FIXED SYNTAX
     fetch(`./businesses/${slug}.json`)
         .then(res => res.json())
-        .then(data => { bizData = data; applyData(); })
-        .catch(err => console.error('Failed to load:', err));
+        .then(data => { bizData = data; applyData(); });
 
     function applyData() {
         document.getElementById('bizName').innerText = bizData.bizName;
@@ -80,54 +62,27 @@
             logo.src = bizData.images.logo;
             logo.classList.remove('hidden');
         }
-        document.getElementById('coverHero').style.backgroundImage = `url('${bizData.images?.cover || ''}')`;
         renderMenu();
         renderCart();
     }
 
     function renderMenu() {
         const container = document.getElementById('menuContainer');
-        
-        // Featured Dish
-        let featuredHTML = '';
-        if (bizData.featuredDish) {
-            featuredHTML = `
-                <div class="bg-amber-50 p-5 rounded-3xl border-2 border-[#D4AF37] mb-8">
-                    <h3 class="text-xs font-bold text-[#D4AF37] uppercase tracking-widest mb-3">⭐ Chef's Special</h3>
-                    <div class="flex items-center gap-4">
-                        <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-inner">
-                            <img src="${bizData.featuredDish.image}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200?text=Food'">
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-bold text-slate-800">${bizData.featuredDish.name}</h4>
-                            <p class="text-xl font-black text-[#D4AF37]">₹${bizData.featuredDish.price}</p>
-                            <button onclick="addToCart('${bizData.featuredDish.name}', ${bizData.featuredDish.price}, '${bizData.featuredDish.image || ''}')" 
-                                    class="mt-2 bg-slate-900 text-[#D4AF37] px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition">
-                                ADD TO CART
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Menu Categories
-        const menuHTML = bizData.menu.map(cat => `
+        container.innerHTML = bizData.menu.map(cat => `
             <div>
-                <h3 class="text-lg font-extrabold mb-4 text-slate-800 border-l-4 border-[#D4AF37] pl-3">${cat.category}</h3>
+                <h3 class="text-lg font-extrabold mb-4 text-slate-100 border-l-4 border-[#D4AF37] pl-3">${cat.category}</h3>
                 <div class="space-y-4">
                     ${cat.items.map(item => `
-                        <div class="premium-card flex items-center gap-4 bg-white p-3">
+                        <div class="premium-card flex items-center gap-4 p-3">
                             <div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
-                                <img src="${item.image || 'https://placehold.co/200x200?text=Food'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200?text=Food'">
+                                <img src="${item.image || 'https://placehold.co/200x200?text=Food'}" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1">
-                                <h4 class="font-bold text-slate-800">${item.name}</h4>
-                                <p class="text-[11px] text-slate-400 line-clamp-1">${item.desc || ''}</p>
+                                <h4 class="font-bold text-slate-100">${item.name}</h4>
+                                <p class="text-xs text-slate-400 line-clamp-1">${item.desc || ''}</p>
                                 <p class="font-bold text-[#D4AF37] mt-1">₹${item.price}</p>
                             </div>
-                            <button onclick="addToCart('${item.name}', ${item.price}, '${item.image || ''}', '${item.id || ''}')" 
-                                    class="bg-slate-50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
+                            <button onclick="addToCart('${item.name}', ${item.price})" class="bg-slate-800 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-slate-900 transition">
                                 <i class="fas fa-plus text-xs"></i>
                             </button>
                         </div>
@@ -135,153 +90,54 @@
                 </div>
             </div>
         `).join('');
-        
-        container.innerHTML = featuredHTML + menuHTML;
     }
 
-    // Cart Functions
-    function addToCart(name, price, image, id) {
-        const existing = cart.find(i => i.id === id || i.name === name);
-        if (existing) {
-            existing.qty++;
-        } else {
-            cart.push({ id: id || name, name, price, image, qty: 1 });
-        }
-        saveCart();
-        renderCart();
-        // Animation feedback
-        const btn = event.target.closest('button');
-        btn.innerHTML = '<i class="fas fa-check"></i>';
-        btn.classList.add('bg-green-600', 'text-white');
-        setTimeout(() => {
-            btn.innerHTML = '<i class="fas fa-plus text-xs"></i>';
-            btn.classList.remove('bg-green-600', 'text-white');
-        }, 500);
-    }
-
-    function removeFromCart(index) {
-        cart.splice(index, 1);
-        saveCart();
-        renderCart();
-    }
-
-    function updateQty(index, delta) {
-        cart[index].qty += delta;
-        if (cart[index].qty <= 0) cart.splice(index, 1);
-        saveCart();
-        renderCart();
-    }
-
-    function saveCart() {
+    function addToCart(name, price) {
+        cart.push({ name, price, qty: 1 });
         localStorage.setItem('waffleCart', JSON.stringify(cart));
-    }
-
-    function renderCart() {
-        const itemsContainer = document.getElementById('cartItems');
-        const countElement = document.getElementById('cartCount');
-        const summaryContainer = document.getElementById('cartSummary');
-        
-        // Update count
-        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-        countElement.innerText = totalItems;
-        
-        if (cart.length === 0) {
-            itemsContainer.innerHTML = '<p class="text-center text-slate-400 py-8">Your cart is empty</p>';
-            summaryContainer.innerHTML = '';
-            return;
-        }
-        
-        // Render items
-        itemsContainer.innerHTML = cart.map((item, idx) => `
-            <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl">
-                <img src="${item.image || 'https://placehold.co/100x100?text=Food'}" class="w-12 h-12 rounded-lg object-cover">
-                <div class="flex-1">
-                    <h4 class="font-bold text-sm">${item.name}</h4>
-                    <p class="text-[#D4AF37] font-bold">₹${item.price}</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="updateQty(${idx}, -1)" class="w-6 h-6 rounded-full bg-slate-200 hover:bg-slate-300">-</button>
-                    <span class="font-bold w-6 text-center">${item.qty}</span>
-                    <button onclick="updateQty(${idx}, 1)" class="w-6 h-6 rounded-full bg-slate-200 hover:bg-slate-300">+</button>
-                </div>
-                <button onclick="removeFromCart(${idx})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
-            </div>
-        `).join('');
-        
-        // Summary
-        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        summaryContainer.innerHTML = `
-            <div class="flex justify-between mb-2">
-                <span class="text-slate-600">Subtotal</span>
-                <span class="font-bold">₹${subtotal}</span>
-            </div>
-            <p class="text-xs text-slate-400 mb-4">Free delivery on orders above ₹500</p>
-        `;
+        renderCart();
+        alert(name + " added!");
     }
 
     function toggleCart() {
-        const drawer = document.getElementById('cartDrawer');
-        const overlay = document.getElementById('cartOverlay');
-        drawer.classList.toggle('active');
-        overlay.classList.toggle('active');
+        document.getElementById('cartDrawer').classList.toggle('active');
+        document.getElementById('cartOverlay').classList.toggle('active');
+        renderCart();
     }
 
-    // Payment Flow
-    function checkout() {
-        if (cart.length === 0) return;
+    function renderCart() {
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        document.getElementById('cartCount').innerText = cart.length;
         
-        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        const itemList = cart.map(i => `${i.name} x${i.qty} - ₹${i.price * i.qty}`).join('\n');
-        
-        // Option 1: UPI Payment Link
-        const upiUrl = `upi://pay?pa=9599507322@ptaxis&pn=WaffleStreet&am=${total}&cu=INR&tn=WaffleStreet%20Order`;
-        
-        // Option 2: WhatsApp Message
-        const message = `🍔 *New Order - WaffleStreet*%0A%0A📋 *Items:*%0A${encodeURIComponent(itemList)}%0A%0A💰 *Total:* ₹${total}%0A%0APlease confirm payment via UPI:`;
-        const waUrl = `https://wa.me/919599507322?text=${message}`;
-        
-        // Show payment options
-        const cartDrawer = document.getElementById('cartDrawer');
-        cartDrawer.innerHTML = `
-            <div class="text-center py-8">
-                <h3 class="text-xl font-bold mb-4">Choose Payment Method</h3>
-                <p class="text-2xl font-black text-[#D4AF37] mb-6">Total: ₹${total}</p>
-                <div class="space-y-4">
-                    <a href="${upiUrl}" class="block w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition">
-                        <i class="fas fa-qrcode mr-2"></i> Pay via UPI
-                    </a>
-                    <a href="${waUrl}" target="_blank" class="block w-full bg-[#25D366] text-white py-4 rounded-xl font-bold hover:bg-green-700 transition">
-                        <i class="fab fa-whatsapp mr-2"></i> Order via WhatsApp
-                    </a>
-                    <button onclick="closeCheckout()" class="block w-full bg-slate-200 text-slate-700 py-4 rounded-xl font-bold hover:bg-slate-300 transition">
-                        Cancel
-                    </button>
-                </div>
+        document.getElementById('cartDrawer').innerHTML = `
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Your Cart</h2>
+                <button onclick="toggleCart()" class="text-slate-400"><i class="fas fa-times text-xl"></i></button>
             </div>
+            <div class="space-y-4 mb-6">
+                ${cart.map((item, i) => `<div class="flex justify-between bg-slate-800 p-3 rounded-lg"><span>${item.name}</span><span class="font-bold">₹${item.price}</span></div>`).join('')}
+            </div>
+            <div class="text-2xl font-black mb-6">Total: ₹${total}</div>
+            <button onclick="showPaymentOptions(${total})" class="w-full bg-[#D4AF37] text-slate-900 py-4 rounded-xl font-bold hover:bg-amber-500 transition">PROCEED TO PAY</button>
         `;
     }
 
-    function closeCheckout() {
-        toggleCart();
-        // Reset cart view after delay
-        setTimeout(() => {
-            document.getElementById('cartDrawer').innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold">Your Cart</h2>
-                    <button onclick="toggleCart()" class="text-slate-500 hover:text-black"><i class="fas fa-times text-xl"></i></button>
-                </div>
-                <div id="cartItems" class="space-y-4 mb-6"></div>
-                <div id="cartSummary" class="border-t pt-4"></div>
-                <button onclick="checkout()" class="w-full bg-[#D4AF37] text-white py-4 rounded-xl font-bold hover:bg-amber-600 transition">
-                    PROCEED TO PAY
-                </button>
-            `;
-            renderCart();
-        }, 300);
+    function showPaymentOptions(total) {
+        // Generate QR code for UPI
+        const upiId = bizData.upiId || '9599507322@ptaxis';
+        const upiLink = `upi://pay?pa=${upiId}&pn=WaffleStreet&am=${total}&cu=INR`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
+
+        document.getElementById('cartDrawer').innerHTML = `
+            <div class="text-center">
+                <h2 class="text-xl font-bold mb-6">Scan to Pay</h2>
+                <img src="${qrUrl}" class="mx-auto bg-white p-2 rounded-lg mb-4">
+                <p class="text-sm text-slate-400 mb-6">Scan with any UPI App (GPay, PhonePe, Paytm)</p>
+                <a href="${upiLink}" class="block w-full bg-[#D4AF37] text-slate-900 py-3 rounded-lg font-bold mb-3">Open UPI App</a>
+                <button onclick="toggleCart()" class="w-full bg-slate-800 py-3 rounded-lg">Back</button>
+            </div>
+        `;
     }
-    
-    // Initialize
-    renderCart();
 </script>
 </body>
 </html>
