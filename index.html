@@ -5,73 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WaffleStreet | Order Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .gold-theme { --primary: #D4AF37; --bg: #1a1a1a; }
-        /* Hero Cover logic */
-        #coverHero { height: 250px; background-size: cover; background-position: center; transition: all 0.5s ease; }
-        .logo-circle { width: 80px; height: 80px; margin-top: -40px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        body { font-family: 'Poppins', sans-serif; }
+        /* Animations */
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Hover Zoom Effect */
+        .zoom-card { transition: all 0.3s ease; }
+        .zoom-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .zoom-img { transition: transform 0.4s ease; }
+        .zoom-card:hover .zoom-img { transform: scale(1.1); }
+
+        #coverHero { height: 280px; background-size: cover; background-position: center; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans">
+<body class="bg-slate-50">
 
-<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl pb-24">
-    <!-- Cover Image Hero -->
-    <div id="coverHero" class="bg-slate-200 relative">
-        <div class="absolute inset-0 bg-black/30"></div>
+<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl pb-24 overflow-hidden">
+    <!-- Hero -->
+    <div id="coverHero" class="relative bg-slate-200">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
     </div>
 
-    <!-- Header & Logo -->
-    <header class="text-center px-4 pb-4">
-        <div class="flex justify-center">
-            <img id="bizLogo" class="logo-circle rounded-full bg-white object-contain hidden">
+    <!-- Header -->
+    <header class="text-center px-6 relative -mt-16 z-10">
+        <div class="inline-block p-1 bg-white rounded-full shadow-lg">
+            <img id="bizLogo" class="w-24 h-24 rounded-full object-cover hidden">
         </div>
-        <h1 id="bizName" class="text-2xl font-black uppercase mt-2 tracking-widest text-slate-800">Loading...</h1>
-        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Amritsar's Favorite Waffles</p>
+        <h1 id="bizName" class="text-2xl font-extrabold uppercase mt-2 text-white md:text-slate-800 transition-colors">Loading...</h1>
     </header>
 
-    <!-- Menu Categories -->
-    <div id="menuContainer" class="p-4 space-y-8"></div>
+    <!-- Menu -->
+    <div id="menuContainer" class="p-6 space-y-8 fade-in"></div>
 
-    <!-- View Cart Button -->
-    <button onclick="toggleCart()" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-4 z-50 border-2 border-[#D4AF37] font-bold">
-        <i class="fas fa-shopping-basket text-[#D4AF37]"></i>
+    <!-- Cart Button -->
+    <button onclick="toggleCart()" class="fixed bottom-6 left-6 right-6 bg-black text-[#D4AF37] py-4 rounded-2xl shadow-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-900 transition z-50">
+        <i class="fas fa-shopping-basket"></i>
         VIEW CART (<span id="cartCount">0</span>)
     </button>
 </div>
 
 <script>
     let bizData = {};
-
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('biz') || 'thewafflestreet-amritsar';
 
-    // Fetch the JSON
     fetch(`./businesses/${slug}.json`)
         .then(res => res.json())
-        .then(data => {
-            bizData = data;
-            applyData();
-        });
+        .then(data => { bizData = data; applyData(); });
 
     function applyData() {
         document.getElementById('bizName').innerText = bizData.bizName;
-
-        // 1. Apply Logo
-        if(bizData.images && bizData.images.logo) {
-            const logoImg = document.getElementById('bizLogo');
-            logoImg.src = bizData.images.logo;
-            logoImg.classList.remove('hidden');
+        if(bizData.images?.logo) {
+            const logo = document.getElementById('bizLogo');
+            logo.src = bizData.images.logo;
+            logo.classList.remove('hidden');
         }
-
-        // 2. Apply Cover Image
-        if(bizData.images && bizData.images.cover) {
-            document.getElementById('coverHero').style.backgroundImage = `url('${bizData.images.cover}')`;
-        } else {
-            // Fallback image if none uploaded
-            document.getElementById('coverHero').style.backgroundImage = `url('https://images.unsplash.com/photo-1573335553610-a871dfd95bf5?auto=format&fit=crop&w=800&q=80')`;
-        }
-
+        document.getElementById('coverHero').style.backgroundImage = `url('${bizData.images?.cover || 'https://images.unsplash.com/photo-1573335553610-a871dfd95bf5?auto=format&fit=crop&w=800&q=80'}')`;
         renderMenu();
     }
 
@@ -79,23 +73,30 @@
         const container = document.getElementById('menuContainer');
         container.innerHTML = bizData.menu.map(cat => `
             <div>
-                <h3 class="text-lg font-black border-l-4 border-[#D4AF37] pl-3 mb-4">${cat.category}</h3>
-                <div class="space-y-3">
+                <h3 class="text-xl font-extrabold mb-4 border-l-4 border-[#D4AF37] pl-3">${cat.category}</h3>
+                <div class="space-y-4">
                     ${cat.items.map(item => `
-                        <div class="flex gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                            ${item.image ? `<img src="${item.image}" class="w-20 h-20 rounded-lg object-cover">` : ''}
+                        <div class="zoom-card flex items-center gap-4 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                            <div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
+                                <img src="${item.image || 'https://placehold.co/200x200?text=Food'}" 
+                                     class="zoom-img w-full h-full object-cover">
+                            </div>
                             <div class="flex-1">
-                                <h4 class="font-bold text-sm text-slate-800">${item.name}</h4>
-                                <p class="text-[10px] text-slate-400 line-clamp-2">${item.desc}</p>
+                                <h4 class="font-bold text-slate-800">${item.name}</h4>
+                                <p class="text-[11px] text-slate-400 line-clamp-1">${item.desc || ''}</p>
                                 <p class="font-black text-[#D4AF37] mt-1">₹${item.price}</p>
                             </div>
-                            <button class="bg-slate-900 text-white w-8 h-8 rounded-full flex items-center justify-center self-center">+</button>
+                            <button class="bg-slate-100 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
+                                <i class="fas fa-plus text-xs"></i>
+                            </button>
                         </div>
                     `).join('')}
                 </div>
             </div>
         `).join('');
     }
+    
+    function toggleCart() { alert("Cart coming soon!"); }
 </script>
 </body>
 </html>
