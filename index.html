@@ -3,73 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WaffleStreet | Order Online</title>
+    <title>WaffleStreet | Fine Dining</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Elegant Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #D4AF37; /* Gold Theme */
-        }
-        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        :root { --primary-gold: #D4AF37; }
+        body { font-family: 'Poppins', sans-serif; background-color: #fcfcfc; color: #334155; }
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
         
-        /* Premium Card Styles */
+        /* Premium Card Style - Clean & Floating */
         .premium-card { 
-            transition: all 0.3s ease; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 1rem; 
+            transition: all 0.4s ease; 
+            border-radius: 1.5rem; 
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .premium-card:hover { 
-            border-color: var(--primary-color); 
-            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.15);
-            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
-
-        /* Animations */
-        .fade-in { animation: fadeIn 0.6s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        #coverHero { height: 280px; background-size: cover; background-position: center; }
+        
+        /* Gold Accent Line */
+        .gold-border { border-left: 4px solid var(--primary-gold); }
     </style>
 </head>
 <body>
 
-<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl pb-24 overflow-hidden">
-    <!-- Hero -->
-    <div id="coverHero" class="relative bg-slate-200">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow-2xl pb-24">
+    <!-- Hero with dark overlay -->
+    <div id="coverHero" class="relative h-72 bg-slate-800 bg-cover bg-center">
+        <div class="absolute inset-0 bg-black/40"></div>
     </div>
     
     <!-- Header -->
-    <header class="text-center px-6 relative -mt-16 z-10">
-        <div class="inline-block p-1 bg-white rounded-full shadow-lg">
-            <img id="bizLogo" class="w-24 h-24 rounded-full object-cover hidden">
+    <header class="text-center px-6 relative -mt-20 z-10">
+        <div class="inline-block p-2 bg-white rounded-full shadow-xl">
+            <img id="bizLogo" class="w-28 h-28 rounded-full object-cover hidden">
         </div>
-        <h1 id="bizName" class="text-2xl font-extrabold uppercase mt-2 text-white md:text-slate-800">Loading...</h1>
+        <h1 id="bizName" class="text-4xl mt-4 text-slate-900 font-bold tracking-tight">Loading...</h1>
+        <p class="text-slate-500 text-sm mt-1 uppercase tracking-widest italic">Fine Dining · Amritsar</p>
     </header>
 
-    <!-- Menu Container -->
-    <div id="menuContainer" class="p-6 space-y-8 fade-in"></div>
+    <!-- Content -->
+    <div id="menuContainer" class="p-6 space-y-10"></div>
 
-    <!-- Cart Button -->
-    <button onclick="toggleCart()" class="fixed bottom-6 left-6 right-6 bg-slate-900 text-[#D4AF37] py-4 rounded-2xl shadow-2xl flex items-center justify-center gap-3 font-bold hover:bg-black transition z-50">
+    <!-- Floating Cart Button -->
+    <button onclick="toggleCart()" class="fixed bottom-6 left-6 right-6 bg-slate-900 text-[#D4AF37] py-5 rounded-full shadow-2xl flex items-center justify-center gap-3 font-bold hover:bg-black transition-all z-50">
         <i class="fas fa-shopping-basket"></i>
-        VIEW CART (<span id="cartCount">0</span>)
+        ORDER NOW (<span id="cartCount">0</span>)
     </button>
 </div>
 
 <script>
     let bizData = {};
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get('biz') || 'thewafflestreet-amritsar';
+    const slug = new URLSearchParams(window.location.search).get('biz') || 'thewafflestreet-amritsar';
 
-    // Fetching the JSON data
     fetch(`./businesses/${slug}.json`)
         .then(res => res.json())
         .then(data => { bizData = data; applyData(); });
 
     function applyData() {
-        document.getElementById('bizName').innerText = bizData.bizName;
+        document.getElementById('bizName').innerText = bizData.bizName.replace(/-/g, ' ');
         if(bizData.images?.logo) {
             const logo = document.getElementById('bizLogo');
             logo.src = bizData.images.logo;
@@ -82,42 +77,40 @@
     function renderMenu() {
         const container = document.getElementById('menuContainer');
         
-        // 1. Render Featured Dish Section
         let featuredHTML = '';
         if (bizData.featuredDish) {
             featuredHTML = `
-                <div class="bg-amber-50 p-5 rounded-3xl border-2 border-[#D4AF37] mb-8">
-                    <h3 class="text-xs font-bold text-[#D4AF37] uppercase tracking-widest mb-3">⭐ Chef's Special</h3>
-                    <div class="flex items-center gap-4">
-                        <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-inner">
-                            <img src="${bizData.featuredDish.image}" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-lg font-bold text-slate-800">${bizData.featuredDish.name}</h4>
-                            <p class="text-xl font-black text-[#D4AF37]">₹${bizData.featuredDish.price}</p>
+                <div class="premium-card p-6 border border-amber-200 bg-amber-50/50">
+                    <h3 class="text-amber-700 text-sm font-bold uppercase tracking-widest mb-4">★ Chef's Recommendation</h3>
+                    <div class="flex items-center gap-6">
+                        <img src="${bizData.featuredDish.image}" 
+                             onerror="this.src='https://placehold.co/200?text=Image+Not+Found'; console.error('Image link is likely not direct.');"
+                             class="w-24 h-24 rounded-2xl object-cover shadow-lg">
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-900">${bizData.featuredDish.name}</h4>
+                            <p class="text-2xl font-bold text-[#D4AF37] mt-1">${bizData.currency}${bizData.featuredDish.price}</p>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        // 2. Render Main Menu
         const menuHTML = bizData.menu.map(cat => `
             <div>
-                <h3 class="text-lg font-extrabold mb-4 text-slate-800 border-l-4 border-[#D4AF37] pl-3">${cat.category}</h3>
-                <div class="space-y-4">
+                <h3 class="text-2xl font-bold text-slate-900 mb-6 gold-border pl-4">${cat.category}</h3>
+                <div class="space-y-6">
                     ${cat.items.map(item => `
-                        <div class="premium-card flex items-center gap-4 bg-white p-3">
-                            <div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
-                                <img src="${item.image || 'https://placehold.co/200x200?text=Food'}" class="w-full h-full object-cover">
+                        <div class="premium-card flex items-center gap-4 p-4 border border-slate-100">
+                            <div class="w-20 h-20 rounded-2xl overflow-hidden shrink-0">
+                                <img src="${item.image || 'https://placehold.co/200?text=Food'}" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1">
-                                <h4 class="font-bold text-slate-800">${item.name}</h4>
-                                <p class="text-[11px] text-slate-400 line-clamp-1">${item.desc || ''}</p>
-                                <p class="font-bold text-[#D4AF37] mt-1">₹${item.price}</p>
+                                <h4 class="font-bold text-slate-900 text-lg">${item.name}</h4>
+                                <p class="text-xs text-slate-500 mt-1">${item.desc || ''}</p>
+                                <p class="font-bold text-[#D4AF37] mt-2 text-lg">${bizData.currency}${item.price}</p>
                             </div>
-                            <button class="bg-slate-50 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition">
-                                <i class="fas fa-plus text-xs"></i>
+                            <button class="bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition-colors">
+                                <i class="fas fa-plus"></i>
                             </button>
                         </div>
                     `).join('')}
