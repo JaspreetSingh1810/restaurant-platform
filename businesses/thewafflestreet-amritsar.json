@@ -17,12 +17,22 @@
     {
       "category": "Combos",
       "items": [
-        {
-          "name": "Aloo Patty Burger Combo",
-          "price": 299,
-          "desc": "Burger+Fries+Coke",
-          "image": ""
-        }
+        {"id": "c1", "name": "Aloo Patty Burger Combo", "price": 299, "desc": "Aloo Patty Burger+Fries [Regular]+Coca Cola [250 ml]"},
+        {"id": "c2", "name": "White sauce pasta + Cold Coffee", "price": 620, "desc": "White sauce pasta with 1 cold coffee [250 ml]"}
+      ]
+    },
+    {
+      "category": "Waffle Pizza",
+      "items": [
+        {"id": "p1", "name": "Cheesy Waffle Pizza", "price": 245, "desc": "Waffle base pizza with lots of cheesy heaven."},
+        {"id": "p2", "name": "Paneer Peri Peri Waffle Pizza", "price": 299, "desc": "Waffle base pizza with spicy peri peri paneer pieces."}
+      ]
+    },
+    {
+      "category": "Burgers",
+      "items": [
+        {"id": "b1", "name": "Veggie Burger", "price": 103, "desc": "Beautiful glazed bun filled with juicy veggie patty."},
+        {"id": "b2", "name": "Cheesinator Burger", "price": 142, "desc": "A burger filled with cheese super satisfaction."}
       ]
     }
   ]
