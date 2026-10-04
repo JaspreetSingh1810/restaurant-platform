@@ -2,56 +2,160 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Platform Admin | TWS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Admin | Menu Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .drag-over { border: 2px dashed #D4AF37; background: #fffcf0; }
+        .item-card:hover .delete-btn { opacity: 1; }
+    </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow p-8">
-        <h1 class="text-3xl font-bold mb-8">Business Manager</h1>
-        
-        <div class="grid grid-cols-2 gap-6">
-            <div class="space-y-4">
-                <div><label class="block text-sm font-bold">Business Name</label><input type="text" id="a-name" class="w-full border p-2 rounded"></div>
-                <div><label class="block text-sm font-bold">WhatsApp Number (e.g. 91...)</label><input type="text" id="a-phone" class="w-full border p-2 rounded"></div>
-                <div><label class="block text-sm font-bold">UPI ID</label><input type="text" id="a-upi" class="w-full border p-2 rounded"></div>
-                
-                <div>
-                    <label class="block text-sm font-bold">Add Item Image (Drag & Drop)</label>
-                    <input type="file" id="a-img" class="border p-4 w-full border-dashed border-gold rounded text-center">
-                    <p class="text-[10px] text-gray-400 mt-1">This will convert image to Base64 for the JSON</p>
+<body class="bg-slate-50 min-h-screen pb-20">
+    <div class="max-w-5xl mx-auto p-4 lg:p-8">
+        <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800">Menu Builder</h1>
+                <p class="text-slate-500">Configure your business and menu items</p>
+            </div>
+            <button onclick="downloadJSON()" class="bg-black text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 transition shadow-lg">
+                <i class="fas fa-download"></i> SAVE & DOWNLOAD JSON
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Business Info -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-store text-gold"></i> Business Profile</h2>
+                    <div class="space-y-4">
+                        <div><label class="block text-xs font-black uppercase text-slate-400 mb-1">Business Name</label>
+                             <input type="text" id="a-name" value="TheWaffleStreet-Amritsar" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-gold outline-none"></div>
+                        <div><label class="block text-xs font-black uppercase text-slate-400 mb-1">WhatsApp (with country code)</label>
+                             <input type="text" id="a-phone" value="919599507322" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-gold outline-none"></div>
+                        <div><label class="block text-xs font-black uppercase text-slate-400 mb-1">UPI ID</label>
+                             <input type="text" id="a-upi" value="jasisandhu15@okaxis" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-gold outline-none"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-star text-gold"></i> Featured Dish</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="f-name" placeholder="Dish Name" class="w-full border p-3 rounded-xl text-sm">
+                        <input type="number" id="f-price" placeholder="Price" class="w-full border p-3 rounded-xl text-sm">
+                        <div id="drop-zone" class="border-2 border-dashed border-slate-200 p-4 rounded-xl text-center cursor-pointer hover:bg-slate-50 transition">
+                            <i class="fas fa-image text-2xl text-slate-300 mb-2"></i>
+                            <p class="text-[10px] text-slate-400">Drag & Drop or Click to upload image</p>
+                            <input type="file" id="f-img" class="hidden" accept="image/*">
+                            <img id="img-preview" class="mt-2 h-20 mx-auto rounded hidden">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-stone-50 p-4 border rounded">
-                <h3 class="font-bold mb-2">Instructions</h3>
-                <ol class="text-sm list-decimal ml-4 space-y-2">
-                    <li>Fill business details.</li>
-                    <li>Add your menu items.</li>
-                    <li>Click <b>"Download JSON"</b>.</li>
-                    <li>Upload this JSON to your <code>/businesses/</code> folder on GitHub.</li>
-                    <li>Your menu is live at <code>yourlink.com/?biz=slug-name</code></li>
-                </ol>
-                <button onclick="downloadJSON()" class="mt-8 w-full bg-black text-white py-4 rounded-lg font-bold">DOWNLOAD BUSINESS JSON</button>
+            <!-- Right: Menu Structure -->
+            <div class="lg:col-span-2 space-y-6">
+                <div id="categories-container" class="space-y-6">
+                    <!-- Categories will be injected here -->
+                </div>
+
+                <button onclick="addCategory()" class="w-full py-4 border-2 border-dashed border-slate-300 rounded-2xl text-slate-400 font-bold hover:border-gold hover:text-gold transition">
+                    <i class="fas fa-plus-circle"></i> ADD NEW CATEGORY
+                </button>
             </div>
         </div>
     </div>
 
     <script>
+        let menuData = [
+            { category: "Combos", items: [{ name: "Aloo Patty Burger Combo", price: 299, desc: "Burger+Fries+Coke" }] }
+        ];
+        let featuredImageBase64 = "";
+
+        // Handle Image Drag & Drop
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('f-img');
+
+        dropZone.onclick = () => fileInput.click();
+        fileInput.onchange = e => handleFile(e.target.files[0]);
+        dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag-over'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+        dropZone.ondrop = e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); };
+
+        function handleFile(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                featuredImageBase64 = e.target.result;
+                document.getElementById('img-preview').src = e.target.result;
+                document.getElementById('img-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderEditor() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = menuData.map((cat, cIdx) => `
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="bg-slate-800 p-4 flex justify-between items-center">
+                        <input type="text" value="${cat.category}" onchange="updateCatName(${cIdx}, this.value)" 
+                               class="bg-transparent text-white font-bold outline-none border-b border-white/20 focus:border-gold">
+                        <button onclick="removeCategory(${cIdx})" class="text-red-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        ${cat.items.map((item, iIdx) => `
+                            <div class="item-card relative grid grid-cols-12 gap-3 p-3 bg-slate-50 rounded-xl group border border-transparent hover:border-gold/20">
+                                <div class="col-span-6">
+                                    <input type="text" placeholder="Item Name" value="${item.name}" onchange="updateItem(${cIdx}, ${iIdx}, 'name', this.value)" class="w-full bg-transparent font-bold text-sm outline-none">
+                                    <input type="text" placeholder="Description" value="${item.desc}" onchange="updateItem(${cIdx}, ${iIdx}, 'desc', this.value)" class="w-full bg-transparent text-[10px] text-slate-400 outline-none">
+                                </div>
+                                <div class="col-span-4">
+                                    <div class="flex items-center gap-1 bg-white px-2 rounded-lg border border-slate-200">
+                                        <span class="text-xs text-slate-400">₹</span>
+                                        <input type="number" value="${item.price}" onchange="updateItem(${cIdx}, ${iIdx}, 'price', this.value)" class="w-full py-1 text-sm outline-none font-bold">
+                                    </div>
+                                </div>
+                                <div class="col-span-2 flex justify-end items-center">
+                                    <button onclick="removeItem(${cIdx}, ${iIdx})" class="delete-btn opacity-0 text-slate-300 hover:text-red-500 transition"><i class="fas fa-times-circle"></i></button>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <button onclick="addItem(${cIdx})" class="w-full py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-50 border border-dashed border-slate-200 hover:bg-white hover:border-gold transition">+ ADD ITEM</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Logic Functions
+        function addCategory() { menuData.push({ category: "New Category", items: [] }); renderEditor(); }
+        function removeCategory(idx) { menuData.splice(idx, 1); renderEditor(); }
+        function updateCatName(idx, val) { menuData[idx].category = val; }
+        function addItem(cIdx) { menuData[cIdx].items.push({ name: "", price: 0, desc: "" }); renderEditor(); }
+        function removeItem(cIdx, iIdx) { menuData[cIdx].items.splice(iIdx, 1); renderEditor(); }
+        function updateItem(cIdx, iIdx, key, val) { menuData[cIdx].items[iIdx][key] = (key === 'price' ? parseFloat(val) : val); }
+
         function downloadJSON() {
-            const data = {
+            const finalData = {
                 bizName: document.getElementById('a-name').value,
                 phone: document.getElementById('a-phone').value,
                 upiId: document.getElementById('a-upi').value,
-                menu: [] // This logic would expand to handle your full UI-builder
+                theme: "gold",
+                featuredDish: {
+                    name: document.getElementById('f-name').value,
+                    price: document.getElementById('f-price').value,
+                    image: featuredImageBase64 || "https://images.unsplash.com/photo-1567620985452-976b4665718f"
+                },
+                menu: menuData
             };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const blob = new Blob([JSON.stringify(finalData, null, 2)], {type: 'application/json'});
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${data.bizName.toLowerCase().replace(/\s/g, '-')}.json`;
+            a.download = `${finalData.bizName.toLowerCase().replace(/\s/g, '-')}.json`;
             a.click();
         }
+
+        renderEditor();
     </script>
 </body>
 </html>
